@@ -87,7 +87,7 @@ is_running=$(docker inspect --format='{{ .State.Running }}' $INSTANCE_ID)
 
 if $is_running
 then
-	docker cp ~/Documents/scripts/healthcheck_$IMAGE_ID.sh $INSTANCE_ID:/var/tmp/
+	docker cp ./resources/healthcheck_$IMAGE_ID.sh $INSTANCE_ID:/var/tmp/
 	docker exec -it $INSTANCE_ID bash .//var/tmp/healthcheck_$IMAGE_ID.sh >/dev/null
 fi
 
