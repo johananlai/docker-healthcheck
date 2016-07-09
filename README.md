@@ -8,14 +8,15 @@ You will need to have the [Docker CLI](https://docs.joyent.com/public-cloud/api-
 ## Running the Tests
 To run the healthcheck, run the script:
 ```sh
-$ ./~/Documents/scripts/healthcheck.sh IMAGE
+$ ./healthcheck.sh IMAGE
 ```
 
 where IMAGE is the name of the Docker image you wish to test.
 
 If you aren't sure about the image name, use
-    docker search TERM
-
+```sh
+$ docker search TERM
+```
 
 ## Supported Images
 Currently, the images that have healthcheck tests implemented are:
