@@ -13,7 +13,7 @@ $ ./healthcheck.sh IMAGE
 
 where IMAGE is the name of the Docker image you wish to test.
 
-If you aren't sure about the image name, use
+If you wish to verify the image's name, use
 ```sh
 $ docker search TERM
 ```
@@ -24,5 +24,6 @@ Currently, the images that have healthcheck tests implemented are:
 * MySQL
 * Node.js
 * NGINX
+* Alpine Linux
 
 Additional images will be added as the script is developed.
