@@ -17,15 +17,15 @@ If you wish to verify the image's name, use `docker search TERM`.
 
 ```bash
 Usage:
-      IMAGE			Name of the image as shown in the Docker Hub, e.g. 'joyent_dev/ubuntu'
-      IMAGE_TYPE		The type of image, e.g. 'mongo', 'node', 'ubuntu'
+      IMAGE                     Name of the image as shown in the Docker Hub, e.g. 'joyent_dev/ubuntu'
+      IMAGE_TYPE                The type of image, e.g. 'mongo', 'node', 'ubuntu'
 
 Options:
-      -v VERSION		Specify version of the image being checked.
-      -t SECONDS	        Specify number of seconds after an image is provisioned to begin
-				running the healthcheck tests. Default is 10 seconds.
+      -v VERSION                Specify version of the image being checked.
+      -t SECONDS                Specify number of seconds after an image is provisioned to begin
+                                running the healthcheck tests. Default is 10 seconds.
 Common options:
-      -V			Display healthcheck script version.
+      -V                        Display healthcheck script version.
       -h                        Display this usage help.
 ```
 
