@@ -1,7 +1,0 @@
-/native/usr/bin/wget http://localhost
-result=$(cat index.html | grep '<title>Welcome to nginx!</title>')
-if [ "$result" != '<title>Welcome to nginx!</title>' ]
-then
-	exit 1
-fi
-
