@@ -6,6 +6,8 @@ A shell script that does a basic healthcheck of a specified Docker image, provid
 
 You will need to have the [Docker CLI](https://docs.joyent.com/public-cloud/api-access/docker), which requires the [Triton CLI](https://docs.joyent.com/public-cloud/api-access/cloudapi) to be installed and configured for Docker.
 
+`healthcheck.sh` can be placed anywhere and executed, provided it is in the same directory as `resources`.
+
 
 ## Usage
 

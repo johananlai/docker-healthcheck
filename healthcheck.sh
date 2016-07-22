@@ -7,7 +7,6 @@
 
 set -eo pipefail
 
-
 usage() {
 cat << EOF
 Usage:
@@ -46,35 +45,32 @@ EXIT_CODE=
 
 while getopts "i:v:t:hV" OPTION; do
     case $OPTION in
-	#i)
-	 # IMAGE_TYPE=$OPTARG
-	  #;;
-	v)
-	  IMAGE_VERSION=$OPTARG
-	  ;;
-	t)
-	  if [[ $OPTARG =~ ^[0-9]+$ ]]; then
-	      TIME_DELAY=$OPTARG
-	  else
-	      echo "healthcheck.sh: Error: -t flag takes an integer parameter."
-    	      echo ""
-	      usage
-	      exit 1
-	  fi
-	  ;;
-	V)
-	  echo "$(basename $0) $VERSION"
+        v)
+          IMAGE_VERSION=$OPTARG
+          ;;
+        t)
+          if [[ $OPTARG =~ ^[0-9]+$ ]]; then
+              TIME_DELAY=$OPTARG
+          else
+              echo "healthcheck.sh: Error: -t flag takes an integer parameter."
+              echo ""
+              usage
+              exit 1
+          fi
+          ;;
+        V)
+          echo "$(basename $0) $VERSION"
           exit 0
           ;;
-	h)
+        h)
           usage
           exit 0
           ;;
-	*)
-	  echo "healthcheck.sh: Error: Invalid or insufficient parameters."
-	  echo ""
-	  usage
-	  exit 0
+        *)
+          echo "healthcheck.sh: Error: Invalid or insufficient parameters."
+          echo ""
+          usage
+          exit 0
           ;;
     esac
 done
@@ -82,6 +78,7 @@ done
 shift $(($OPTIND - 1))
 IMAGE_TYPE=$1
 IMAGE=$2
+
 
 
 if [[ -z $IMAGE ]] || [[ -z $IMAGE_TYPE ]]; then
@@ -99,8 +96,6 @@ else
     echo "Creating an instance using the image: $IMAGE (ver. $IMAGE_VERSION)..."
     echo ""
 fi
-
-
 
 
 if [[ $IMAGE_TYPE == "alpine" ]]; then
@@ -130,36 +125,34 @@ echo ""
 
 if [[ $IS_RUNNING ]]; then
     docker cp ./resources/$IMAGE_TYPE $INSTANCE_ID:/var/tmp/
-    
+
     if [[ $IMAGE_TYPE == "alpine" ]]; then
         INSTANCE_ID=$(docker start $INSTANCE_ID)
     else
         docker exec -it $INSTANCE_ID bash .//var/tmp/$IMAGE_TYPE &>/dev/null || FAILED=true
     fi
-    
+
     EXIT_CODE=$(docker inspect --format='{{ .State.ExitCode }}' $INSTANCE_ID)
+
+    if [[ $EXIT_CODE != 0 ]] || [[ $FAILED ]]; then
+        echo "$IMAGE (ver. $IMAGE_VERSION) failed the healthcheck on `date`" >> healthcheck.log
+        echo "" >> healthcheck.log
+        echo "$IMAGE (ver. $IMAGE_VERSION) failed to execute the following:"
+        echo ""
+
+        while read line; do
+            echo "    $line"
+        done < ./resources/$IMAGE_TYPE
+    else
+        echo "$IMAGE (ver. $IMAGE_VERSION) passed the healthcheck on `date`" >> healthcheck.log
+        echo "" >> healthcheck.log
+        echo "  * * *  Healthcheck ran successfully. No problems were found.  * * *"
+    fi
 else
     echo "$IMAGE failed to run. Tests could not be initiated."
     echo "$IMAGE (ver. $IMAGE_VERSION) failed the healthcheck on `date`" >> healthcheck.log
     echo "" >> healthcheck.log
 fi
-
-
-if [[ $EXIT_CODE != 0 ]] || [[ $FAILED ]] && [[ $IS_RUNNING ]]; then
-    echo "$IMAGE (ver. $IMAGE_VERSION) failed the healthcheck on `date`" >> healthcheck.log
-    echo "" >> healthcheck.log
-    echo "$IMAGE (ver. $IMAGE_VERSION) failed to execute the following:"
-    echo ""
-
-    while read line; do
-	echo "    $line"
-    done < ./resources/$IMAGE
-else
-    echo "$IMAGE (ver. $IMAGE_VERSION) passed the healthcheck on `date`" >> healthcheck.log
-    echo "" >> healthcheck.log
-    echo "  * * * Healthcheck ran successfully. No problems were found. * * *"
-fi
-
 
 
 echo ""
@@ -170,7 +163,7 @@ REMOVE_ID=$(docker rm $INSTANCE_ID)
 
 echo ""
 echo ""
-echo "  * * *  Healthcheck complete * * *"
+echo "  * * *  Healthcheck complete  * * *"
 echo ""
 echo ""
 
