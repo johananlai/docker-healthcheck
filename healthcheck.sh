@@ -32,13 +32,13 @@ EOF
 
 
 NAME=$(basename $0)
-VERSION=0.3.0
+VERSION=0.3.1
 IMAGE=
-IMAGE_TYPE=
+REPO=
 IMAGE_VERSION=latest
-TIME_DELAY=10
+DELAY=10
 RETRIES=0
-INSTANCE_ID=
+INSTANCE=
 IS_RUNNING=false
 EXIT_CODE=
 
@@ -76,12 +76,11 @@ while getopts "i:v:t:hV" OPTION; do
 done
 
 shift $(($OPTIND - 1))
-IMAGE_TYPE=$1
+REPO=$1
 IMAGE=$2
 
 
-
-if [[ -z $IMAGE ]] || [[ -z $IMAGE_TYPE ]]; then
+if [[ -z $IMAGE ]] || [[ -z $REPO ]]; then
     echo "healthcheck.sh: Healthcheck requires at least 2 arguments."
     echo ""
     usage
@@ -98,23 +97,23 @@ else
 fi
 
 
-if [[ $IMAGE_TYPE == "alpine" ]]; then
-    INSTANCE_ID=$(docker create $IMAGE:$IMAGE_VERSION /bin/sh -c .//var/tmp/alpine)
+if [[ $REPO == "alpine" ]]; then
+    INSTANCE=$(docker create $IMAGE:$IMAGE_VERSION /bin/sh -c .//var/tmp/alpine)
     IS_RUNNING=true
 else
-    if [[ $IMAGE_TYPE == "mysql" ]]; then
-        INSTANCE_ID=$(docker run -d -e MYSQL_ROOT_PASSWORD=password $IMAGE:$IMAGE_VERSION)
-    elif [[ $IMAGE_TYPE == "node" ]]; then
-        INSTANCE_ID=$(docker run -dit $IMAGE:$IMAGE_VERSION)
+    if [[ $REPO == "mysql" ]]; then
+        INSTANCE=$(docker run -d -e MYSQL_ROOT_PASSWORD=password $IMAGE:$IMAGE_VERSION)
+    elif [[ $REPO == "node" ]]; then
+        INSTANCE=$(docker run -dit $IMAGE:$IMAGE_VERSION)
     else
-        INSTANCE_ID=$(docker run -d $IMAGE:$IMAGE_VERSION)
+        INSTANCE=$(docker run -d $IMAGE:$IMAGE_VERSION)
     fi
     
-    IS_RUNNING=$(docker inspect --format='{{ .State.Running }}' $INSTANCE_ID)
+    IS_RUNNING=$(docker inspect --format='{{ .State.Running }}' $INSTANCE)
 
-    echo "Finished provisioning, waiting $TIME_DELAY seconds for instance to configure..."
+    echo "Finished provisioning, waiting $DELAY seconds for instance to configure..."
     echo ""
-    sleep $TIME_DELAY
+    sleep $DELAY
 fi
 
 echo "Now running tests..."
@@ -122,24 +121,22 @@ echo ""
 echo ""
 
 
-
 if [[ $IS_RUNNING ]]; then
-    docker cp ./resources/$IMAGE_TYPE $INSTANCE_ID:/var/tmp/
+    docker cp ./resources/$REPO $INSTANCE:/var/tmp/
 
-    if [[ $IMAGE_TYPE == "alpine" ]]; then
-        INSTANCE_ID=$(docker start $INSTANCE_ID)
+    if [[ $REPO == "alpine" ]]; then
+        INSTANCE=$(docker start $INSTANCE)
     else
-        docker exec -it $INSTANCE_ID bash .//var/tmp/$IMAGE_TYPE &>/dev/null || FAILED=true
+        docker exec -it $INSTANCE bash .//var/tmp/$REPO &>/dev/null || FAILED=true
     fi
 
-    EXIT_CODE=$(docker inspect --format='{{ .State.ExitCode }}' $INSTANCE_ID)
+    EXIT_CODE=$(docker inspect --format='{{ .State.ExitCode }}' $INSTANCE)
 
     if [[ $EXIT_CODE != 0 ]] || [[ $FAILED ]]; then
         echo "$IMAGE (ver. $IMAGE_VERSION) failed the healthcheck on `date`" >> healthcheck.log
         echo "" >> healthcheck.log
         echo "$IMAGE (ver. $IMAGE_VERSION) failed to execute the following:"
         echo ""
-
         while read line; do
             echo "    $line"
         done < ./resources/$IMAGE_TYPE
@@ -158,12 +155,10 @@ fi
 echo ""
 echo ""
 echo "Stopping and removing the test instance..."
-KILL_ID=$(docker kill $INSTANCE_ID)
-REMOVE_ID=$(docker rm $INSTANCE_ID)
-
+INSTANCE=$(docker kill $INSTANCE)
+INSTANCE=$(docker rm $INSTANCE)
 echo ""
 echo ""
 echo "  * * *  Healthcheck complete  * * *"
 echo ""
 echo ""
-
