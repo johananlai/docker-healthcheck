@@ -1,4 +1,8 @@
-# Docker Image Healthcheck
+# [DEPRECATED] Docker Image Healthcheck
+
+**NOTE**: This project has been abandoned. A more thorough, fully-implemented healthcheck/test suite written and maintained by Docker can be found here: https://github.com/docker-library/official-images/tree/master/test
+
+---
 
 A shell script that does a basic healthcheck of a specified Docker image, provided the image type and its name as shown in the Docker Hub.
 
